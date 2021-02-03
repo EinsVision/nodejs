@@ -1,19 +1,21 @@
 const http = require('http');
 const fs = require('fs');
 const url = require('url');
+const qs = require('querystring');
 
 function templateHTML(title, list, body){
   return `
     <!doctype html>
     <html>
     <head>
-    <title>WEB1 - ${title}</title>
-    <meta charset="utf-8">
+      <title>WEB1 - ${title}</title>
+      <meta charset="utf-8">
     </head>
     <body>
-    <h1><a href="/">WEB</a></h1>
-    ${list}
-    ${body}
+      <h1><a href="/">WEB</a></h1>
+      ${list}
+      <a href="/create">create</a>
+      ${body}
     </body>
     </html>
 
@@ -71,6 +73,48 @@ const app = http.createServer(function(request,response){
           });
         });
       }
+    } else if(pathname === '/create'){
+      const testFolder = './data/';
+
+      fs.readdir(testFolder, (err, files) => { 
+          var title = 'WEB - create';
+          var list = templateList(files);
+   
+          var template = templateHTML(title, list, `
+          <form action="http://localhost:3000/create_process" method="POST">
+            <p>
+                <input type="text" name="title" placeholder="title">
+            </p>
+            
+            <p>
+                <textarea name="description" placeholder="description"></textarea>
+            </p>
+            
+            <p>
+                <input type="submit">
+            </p>
+          </form>
+          
+          `);
+
+          response.writeHead(200); // 파일을 성공적으로 전송했다.
+          response.end(template);
+
+        }) 
+    } else if(pathname === '/create_process'){
+      var body ='';
+      request.on('data', function(data){
+        body = body + data;
+      });
+
+      request.on('end', function(){
+        var post = qs.parse(body);
+        var title = post.title; // create로 부터 입력받은 title을 얻을 수 있다.
+        var descrtiption = post.description;
+      });
+
+      response.writeHead(200); // 파일을 성공적으로 전송했다.
+      response.end('success');
     } else{
       response.writeHead(404); // 파일을 찾을 수 없다.
       response.end('Not Found');
