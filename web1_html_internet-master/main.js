@@ -174,4 +174,4 @@ const app = http.createServer(function(request,response){
       return;
     }
    });
-app.listen(3000);
+app.listen(3000); //3000번 포트를 바라보고 있다.
