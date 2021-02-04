@@ -3,35 +3,38 @@ const fs = require('fs');
 const url = require('url');
 const qs = require('querystring');
 
-function templateHTML(title, list, body, control){
-  return `
-    <!doctype html>
-    <html>
-    <head>
-      <title>WEB1 - ${title}</title>
-      <meta charset="utf-8">
-    </head>
-    <body>
-      <h1><a href="/">WEB</a></h1>
-      ${list}
-      ${control}
-      ${body}
-    </body>
-    </html>
+// object 만둘기
+var template = {
+  html: (title, list, body, control) => {
+    return `
+      <!doctype html>
+      <html>
+      <head>
+        <title>WEB1 - ${title}</title>
+        <meta charset="utf-8">
+      </head>
+      <body>
+        <h1><a href="/">WEB</a></h1>
+        ${list}
+        ${control}
+        ${body}
+      </body>
+      </html>
+  
+    `;
+  },
 
-  `;
-}
-
-function templateList(files){
-  var list = '<ul>';
-  var i = 0;
-  while(i< files.length ){
-    list = list + `<li><a href="/?id=${files[i]}">${files[i]}</a></li>`;
-    i++;
-
+  list: (files) => {
+    var list = '<ul>';
+    var i = 0;
+    while(i< files.length ){
+      list = list + `<li><a href="/?id=${files[i]}">${files[i]}</a></li>`;
+      i++;
+  
+    }
+    list = list + '</ul>';
+    return list;
   }
-  list = list + '</ul>';
-  return list;
 }
 
 const app = http.createServer(function(request,response){
@@ -46,14 +49,14 @@ const app = http.createServer(function(request,response){
 
         fs.readdir(testFolder, (err, files) => { 
             var title = 'Welcome';
-            var list = templateList(files);
+            var description = "Hello Node.js";  
 
-            var description = "Hello Node.js";      
-            var template = templateHTML(title, list, `<h2>${title}</h2><p>${description}</p>`, 
+            var list = template.list(files);              
+            var html = template.html(title, list, `<h2>${title}</h2><p>${description}</p>`, 
             `<a href="/create">create</a>`);
 
             response.writeHead(200); // 파일을 성공적으로 전송했다.
-            response.end(template);
+            response.end(html);
 
           }) 
       }
@@ -64,8 +67,8 @@ const app = http.createServer(function(request,response){
 
           fs.readFile(`data/${queryData.id}`, 'utf8', (err, description) => {
             var title = queryData.id;      
-            var list = templateList(files);
-            var template = templateHTML(title, list, `<h2>${title}</h2><p>${description}</p>`, 
+            var list = template.list(files);
+            var html = template.html(title, list, `<h2>${title}</h2><p>${description}</p>`, 
             `<a href="/create">create</a> 
             <a href="/update?id=${title}">update</a>
             <form action="delete_process" method="post">
@@ -75,7 +78,7 @@ const app = http.createServer(function(request,response){
             `);
     
             response.writeHead(200); // 파일을 성공적으로 전송했다.
-            response.end(template);
+            response.end(html);
           });
         });
       }
@@ -84,9 +87,9 @@ const app = http.createServer(function(request,response){
 
       fs.readdir(testFolder, (err, files) => { 
           var title = 'WEB - create';
-          var list = templateList(files);
+          var list = template.list(files);
    
-          var template = templateHTML(title, list, `
+          var html = template.html(title, list, `
           <form action="/create_process" method="POST">
             <p>
                 <input type="text" name="title" placeholder="title">
@@ -104,7 +107,7 @@ const app = http.createServer(function(request,response){
           `, '');
 
           response.writeHead(200); // 파일을 성공적으로 전송했다.
-          response.end(template);
+          response.end(html);
 
         }) 
     } else if(pathname === '/create_process'){
@@ -134,8 +137,8 @@ const app = http.createServer(function(request,response){
 
           fs.readFile(`data/${queryData.id}`, 'utf8', (err, description) => {
             var title = queryData.id;      
-            var list = templateList(files);
-            var template = templateHTML(title, list, 
+            var list = template.list(files);
+            var html = template.html(title, list, 
               `
               <form action="/update_process" method="POST">
                 <input type="hidden" name="id" value="${title}">
@@ -155,7 +158,7 @@ const app = http.createServer(function(request,response){
             `<a href="/create">create</a> <a href="/update?id=${title}">update</a> `);
     
             response.writeHead(200); // 파일을 성공적으로 전송했다.
-            response.end(template);
+            response.end(html);
           });
         });
 

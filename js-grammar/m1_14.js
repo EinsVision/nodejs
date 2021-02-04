@@ -20,6 +20,5 @@ var obj = {
     }
 }
 
+module.exports = obj;
 
-obj.f1();
-obj.f2();
